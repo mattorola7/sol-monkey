@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dancing Monkey</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    @import url('https://adom.inc/fonts/familjen-grotesk/familjen-grotesk.css');
+    @import url('https://adom.inc/fonts/satoshi/satoshi.css');
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2129;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-dim: #8b949e;
+      --accent: #00b8b0;
+      --monkey-brown: #c97d4e;
+      --monkey-dark: #a0623a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Satoshi', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-family: 'Familjen Grotesk', sans-serif;
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+
+    .stage {
+      position: relative;
+      width: 320px;
+      height: 380px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    /* ── Music notes ── */
+    .note {
+      position: absolute;
+      font-size: 22px;
+      color: var(--accent);
+      opacity: 0;
+      animation: floatnote 2s ease-in infinite;
+      pointer-events: none;
+    }
+    .note:nth-child(1) { left: 60px;  animation-delay: 0s;    animation-duration: 2.1s; }
+    .note:nth-child(2) { left: 100px; animation-delay: 0.5s;  animation-duration: 1.8s; }
+    .note:nth-child(3) { right: 60px; animation-delay: 1s;    animation-duration: 2.3s; }
+    .note:nth-child(4) { right: 90px; animation-delay: 1.5s;  animation-duration: 1.9s; }
+
+    @keyframes floatnote {
+      0%   { opacity: 0; transform: translateY(0) scale(0.8); }
+      20%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-120px) scale(1.2) rotate(15deg); }
+    }
+
+    /* ── Monkey SVG container ── */
+    .monkey {
+      animation: bodybounce 0.5s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+      position: relative;
+    }
+
+    @keyframes bodybounce {
+      from { transform: translateY(0) rotate(-3deg); }
+      to   { transform: translateY(-14px) rotate(3deg); }
+    }
+
+    /* Arms */
+    .arm-left {
+      transform-origin: 38px 38px;
+      animation: armleft 0.5s ease-in-out infinite alternate;
+    }
+    .arm-right {
+      transform-origin: 122px 38px;
+      animation: armright 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes armleft {
+      from { transform: rotate(-40deg); }
+      to   { transform: rotate(30deg); }
+    }
+    @keyframes armright {
+      from { transform: rotate(40deg); }
+      to   { transform: rotate(-30deg); }
+    }
+
+    /* Legs */
+    .leg-left {
+      transform-origin: 62px 130px;
+      animation: legleft 0.5s ease-in-out infinite alternate;
+    }
+    .leg-right {
+      transform-origin: 98px 130px;
+      animation: legright 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes legleft {
+      from { transform: rotate(-15deg); }
+      to   { transform: rotate(15deg); }
+    }
+    @keyframes legright {
+      from { transform: rotate(15deg); }
+      to   { transform: rotate(-15deg); }
+    }
+
+    /* Tail */
+    .tail {
+      animation: tailwag 0.5s ease-in-out infinite alternate;
+      transform-origin: 105px 110px;
+    }
+    @keyframes tailwag {
+      from { transform: rotate(-20deg); }
+      to   { transform: rotate(20deg); }
+    }
+
+    /* Eyes blink */
+    .eye-whites {
+      animation: blink 3s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95%           { transform: scaleY(0.1); }
+    }
+
+    /* ── Controls ── */
+    .controls {
+      margin-top: 32px;
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Satoshi', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover { background: var(--surface2); border-color: var(--accent); }
+    button.active { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+
+    .speed-label {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dancing Monkey</h1>
+  <p>He can't stop. He won't stop.</p>
+
+  <div class="stage">
+    <!-- Music notes -->
+    <div class="note">♪</div>
+    <div class="note">♫</div>
+    <div class="note">♩</div>
+    <div class="note">♬</div>
+
+    <div class="monkey">
+      <svg width="160" height="200" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Tail -->
+        <g class="tail">
+          <path d="M105 120 Q140 100 135 70 Q130 50 115 60" stroke="#c97d4e" stroke-width="8" fill="none" stroke-linecap="round"/>
+        </g>
+
+        <!-- Left arm -->
+        <g class="arm-left">
+          <rect x="18" y="32" width="28" height="10" rx="5" fill="#c97d4e"/>
+          <!-- Hand -->
+          <circle cx="14" cy="37" r="8" fill="#c97d4e"/>
+          <circle cx="10" cy="32" r="4" fill="#c97d4e"/>
+          <circle cx="6"  cy="36" r="3.5" fill="#c97d4e"/>
+        </g>
+
+        <!-- Right arm -->
+        <g class="arm-right">
+          <rect x="114" y="32" width="28" height="10" rx="5" fill="#c97d4e"/>
+          <!-- Hand -->
+          <circle cx="146" cy="37" r="8" fill="#c97d4e"/>
+          <circle cx="150" cy="32" r="4" fill="#c97d4e"/>
+          <circle cx="154" cy="36" r="3.5" fill="#c97d4e"/>
+        </g>
+
+        <!-- Body -->
+        <ellipse cx="80" cy="120" rx="34" ry="42" fill="#00b8b0"/>
+        <!-- Belly patch -->
+        <ellipse cx="80" cy="122" rx="20" ry="26" fill="#c97d4e"/>
+
+        <!-- Left leg -->
+        <g class="leg-left">
+          <rect x="54" y="148" width="18" height="38" rx="9" fill="#00b8b0"/>
+          <!-- Foot -->
+          <ellipse cx="55" cy="188" rx="12" ry="7" fill="#a0623a"/>
+        </g>
+        <!-- Right leg -->
+        <g class="leg-right">
+          <rect x="88" y="148" width="18" height="38" rx="9" fill="#00b8b0"/>
+          <!-- Foot -->
+          <ellipse cx="105" cy="188" rx="12" ry="7" fill="#a0623a"/>
+        </g>
+
+        <!-- Ears -->
+        <circle cx="36" cy="56" r="14" fill="#00b8b0"/>
+        <circle cx="36" cy="56" r="8"  fill="#c97d4e"/>
+        <circle cx="124" cy="56" r="14" fill="#00b8b0"/>
+        <circle cx="124" cy="56" r="8"  fill="#c97d4e"/>
+
+        <!-- Head -->
+        <ellipse cx="80" cy="52" rx="36" ry="34" fill="#00b8b0"/>
+
+        <!-- Face patch -->
+        <ellipse cx="80" cy="58" rx="22" ry="18" fill="#c97d4e"/>
+
+        <!-- Eyes -->
+        <g class="eye-whites">
+          <circle cx="68" cy="46" r="9" fill="white"/>
+          <circle cx="92" cy="46" r="9" fill="white"/>
+        </g>
+        <circle cx="70" cy="48" r="5" fill="#0d1117"/>
+        <circle cx="94" cy="48" r="5" fill="#0d1117"/>
+        <!-- Eye shine -->
+        <circle cx="72" cy="46" r="2" fill="white"/>
+        <circle cx="96" cy="46" r="2" fill="white"/>
+
+        <!-- Nostrils -->
+        <circle cx="74" cy="58" r="3.5" fill="#a0623a"/>
+        <circle cx="86" cy="58" r="3.5" fill="#a0623a"/>
+
+        <!-- Smile -->
+        <path d="M66 66 Q80 76 94 66" stroke="#a0623a" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+        <!-- Top of head hair tuft -->
+        <ellipse cx="80" cy="20" rx="10" ry="7" fill="#a0623a"/>
+        <ellipse cx="68" cy="23" rx="6"  ry="5" fill="#a0623a"/>
+        <ellipse cx="92" cy="23" rx="6"  ry="5" fill="#a0623a"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-slow" onclick="setSpeed('slow')">🐢 Slow</button>
+    <button id="btn-normal" class="active" onclick="setSpeed('normal')">🎵 Normal</button>
+    <button id="btn-fast" onclick="setSpeed('fast')">🔥 Fast</button>
+  </div>
+  <div class="speed-label" id="speed-label">grooving at normal speed</div>
+
+  <script>
+    const speeds = {
+      slow:   { dur: '1s',    label: 'taking it easy' },
+      normal: { dur: '0.5s',  label: 'grooving at normal speed' },
+      fast:   { dur: '0.18s', label: 'absolutely losing it' },
+    };
+
+    function setSpeed(s) {
+      const { dur, label } = speeds[s];
+      document.querySelectorAll('.monkey, .arm-left, .arm-right, .leg-left, .leg-right, .tail').forEach(el => {
+        el.style.animationDuration = dur;
+      });
+      document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + s).classList.add('active');
+      document.getElementById('speed-label').textContent = label;
+    }
+  </script>
+</body>
+</html>
